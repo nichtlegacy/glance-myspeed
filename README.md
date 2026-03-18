@@ -15,7 +15,7 @@
   <a href="#overview">Overview</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#widget-options">Widget Options</a> •
-  <a href="#references">References</a> •
+  <a href="#references">References</a>
 </p>
 
 <p align="center">
