@@ -11,8 +11,10 @@
         Accept: application/json
   options:
     showPercentageDiff: true
+    showUnit: false
   template: |
     {{ $showPercentage := .Options.BoolOr "showPercentageDiff" true }}
+    {{ $showUnit := .Options.BoolOr "showUnit" false }}
 
     {{ $stats := .Subrequest "stats" }}
     {{ $latest := index (.JSON.Array "") 0 }}
@@ -33,7 +35,7 @@
           {{ end }}
         </div>
         {{ end }}
-        <div class="color-highlight size-h3">{{ $latest.Float "download" | printf "%.1f" }}</div>
+        <div class="color-highlight size-h3">{{ $latest.Float "download" | printf "%.1f" }}{{ if $showUnit }}<span class="color-base" style="font-size: 0.7em; margin-left: 0.2em; vertical-align: baseline;">Mbit/s</span>{{ end }}</div>
         <div class="size-h6">DOWNLOAD</div>
       </div>
       <div>
@@ -52,7 +54,7 @@
           {{ end }}
         </div>
         {{ end }}
-        <div class="color-highlight size-h3">{{ $latest.Float "upload" | printf "%.1f" }}</div>
+        <div class="color-highlight size-h3">{{ $latest.Float "upload" | printf "%.1f" }}{{ if $showUnit }}<span class="color-base" style="font-size: 0.7em; margin-left: 0.2em; vertical-align: baseline;">Mbit/s</span>{{ end }}</div>
         <div class="size-h6">UPLOAD</div>
       </div>
       <div>
@@ -71,7 +73,7 @@
           {{ end }}
         </div>
         {{ end }}
-        <div class="color-highlight size-h3">{{ $latest.Float "ping" | printf "%.0f ms" }}</div>
+        <div class="color-highlight size-h3">{{ $latest.Float "ping" | printf "%.0f" }}{{ if $showUnit }}<span class="color-base" style="font-size: 0.7em; margin-left: 0.2em; vertical-align: baseline;">ms</span>{{ else }} ms{{ end }}</div>
         <div class="size-h6">PING</div>
       </div>
     </div>

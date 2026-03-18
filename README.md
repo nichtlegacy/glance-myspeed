@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/myspeed.png" alt="MySpeed widget preview" width="100%">
+  <img src="docs/myspeed_unit.png" alt="MySpeed widget preview" width="100%">
 </p>
 
 ---
@@ -61,9 +61,19 @@ Reference config: `examples/glance.yml`
 
 ### Speed (`widgets/myspeed.yml`)
 
+**Percentage + Units** (`showPercentageDiff: true`, `showUnit: true`)
 <p align="center">
-  <img src="docs/myspeed.png" alt="MySpeed widget preview" width="100%">
+  <img src="docs/myspeed_unit.png" alt="MySpeed widget with percentage diff and units" width="100%">
 </p>
+
+**Percentage only** (`showPercentageDiff: true`, `showUnit: false`)
+<p align="center">
+  <img src="docs/myspeed_percentage.png" alt="MySpeed widget with percentage diff only" width="100%">
+</p>
+
+**Clean** (`showPercentageDiff: false`, `showUnit: false`)
+<p align="center">
+  <img src="docs/myspeed.png" alt="MySpeed widget clean" width="100%">
 
 ```yaml
 - type: custom-api
@@ -79,6 +89,7 @@ Reference config: `examples/glance.yml`
         Accept: application/json
   options:
     showPercentageDiff: true
+    showUnit: false
   template: |
     ...
 ```
@@ -86,6 +97,7 @@ Reference config: `examples/glance.yml`
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `showPercentageDiff` | bool | `true` | Show percentage difference from average |
+| `showUnit` | bool | `false` | Show "Mbit/s" and "ms" unit labels inline with values |
 
 ---
 
