@@ -28,6 +28,14 @@
 
 A drop-in [Glance](https://github.com/glanceapp/glance) `custom-api` widget to display your [MySpeed](https://github.com/gnmyt/MySpeed) speedtest results.
 
+The widget can optionally show a centered `Last test` footer. The timestamp is formatted based on age:
+
+- today: `Last test: 18:42`
+- yesterday: `Last test: yesterday 23:00`
+- older: `Last test: 18.03. 23:00`
+
+If `showRelativeTime` is enabled, the footer appends Glance's relative age output with a trailing `ago`, for example `Last test: 18:42 · 27m ago`.
+
 | Widget | Purpose | File |
 |---|---|---|
 | Speed | Download/Upload speeds with ping and percentage diff from average | `widgets/myspeed.yml` |
@@ -79,25 +87,22 @@ Reference config: `examples/glance.yml`
 - type: custom-api
   title: Internet Speed
   cache: 1h
-  url: ${MYSPEED_URL}/api/speedtests?limit=1
-  headers:
-    Accept: application/json
-  subrequests:
-    stats:
-      url: ${MYSPEED_URL}/api/speedtests/statistics
-      headers:
-        Accept: application/json
   options:
     showPercentageDiff: true
-    showUnit: false
+    showUnit: true
+    showLastTest: false
+    showRelativeTime: false
   template: |
+    # Requests and fallback states are handled inside the template
     ...
 ```
 
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `showPercentageDiff` | bool | `true` | Show percentage difference from average |
-| `showUnit` | bool | `false` | Show "Mbit/s" and "ms" unit labels inline with values |
+| `showUnit` | bool | `true` | Show "Mbit/s" and "ms" unit labels inline with values |
+| `showLastTest` | bool | `false` | Show a centered `Last test` footer with age-aware formatting (`18:42`, `yesterday 23:00`, `18.03. 23:00`) |
+| `showRelativeTime` | bool | `false` | When `showLastTest` is enabled, append Glance's relative age output with a trailing `ago` to the `Last test` footer |
 
 ---
 

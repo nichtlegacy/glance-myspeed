@@ -1,27 +1,49 @@
 - type: custom-api
   cache: 1h
   title: Internet Speed
-  url: ${MYSPEED_URL}/api/speedtests?limit=1
-  headers:
-    Accept: application/json
-  subrequests:
-    stats:
-      url: ${MYSPEED_URL}/api/speedtests/statistics
-      headers:
-        Accept: application/json
   options:
     showPercentageDiff: true
-    showUnit: false
+    showUnit: true
+    showLastTest: false
+    showRelativeTime: false
   template: |
     {{ $showPercentage := .Options.BoolOr "showPercentageDiff" true }}
-    {{ $showUnit := .Options.BoolOr "showUnit" false }}
+    {{ $showUnit := .Options.BoolOr "showUnit" true }}
+    {{ $showLastTest := .Options.BoolOr "showLastTest" false }}
+    {{ $showRelativeTime := .Options.BoolOr "showRelativeTime" false }}
+    {{ $latestResponse := newRequest "${MYSPEED_URL}/api/speedtests?limit=1" | getResponse }}
+    {{ $latestStatus := 0 }}
+    {{ with $latestResponse.Response }}{{ $latestStatus = .StatusCode }}{{ end }}
 
-    {{ $stats := .Subrequest "stats" }}
-    {{ $latest := index (.JSON.Array "") 0 }}
+    {{ if ne $latestStatus 200 }}
+    <div class="text-center margin-block-3">
+      <div class="color-negative size-h4">MySpeed unavailable</div>
+      <div class="color-base size-h6">The latest speedtest data could not be loaded.</div>
+      {{ if gt $latestStatus 0 }}
+      <div class="color-base size-h6">HTTP {{ $latestStatus }}</div>
+      {{ end }}
+    </div>
+    {{ else }}
+    {{ $latestItems := $latestResponse.JSON.Array "" }}
+    {{ if eq (len $latestItems) 0 }}
+    <div class="text-center margin-block-3">
+      <div class="color-primary size-h4">No speedtests yet</div>
+      <div class="color-base size-h6">Run a test in MySpeed and the latest result will appear here.</div>
+    </div>
+    {{ else }}
+    {{ $latest := index $latestItems 0 }}
+    {{ $lastTestRaw := $latest.String "created" }}
+    {{ if eq $lastTestRaw "" }}{{ $lastTestRaw = $latest.String "created_at" }}{{ end }}
+    {{ if eq $lastTestRaw "" }}{{ $lastTestRaw = $latest.String "createdAt" }}{{ end }}
+    {{ if eq $lastTestRaw "" }}{{ $lastTestRaw = $latest.String "timestamp" }}{{ end }}
+    {{ $statsResponse := newRequest "${MYSPEED_URL}/api/speedtests/statistics" | getResponse }}
+    {{ $statsStatus := 0 }}
+    {{ with $statsResponse.Response }}{{ $statsStatus = .StatusCode }}{{ end }}
+    {{ $hasStats := eq $statsStatus 200 }}
     <div class="flex justify-between text-center margin-block-3">
       <div>
-        {{ $downloadChange := percentChange ($latest.Float "download") ($stats.JSON.Float "download.avg") }}
-        {{ if $showPercentage }}
+        {{ if and $showPercentage $hasStats }}
+        {{ $downloadChange := percentChange ($latest.Float "download") ($statsResponse.JSON.Float "download.avg") }}
         <div class="size-small {{ if gt $downloadChange 0.0 }}color-positive{{ else if lt $downloadChange 0.0 }}color-negative{{ else }}color-primary{{ end }}" style="display: inline-flex; align-items: center;">
           {{ $downloadChange | printf "%+.1f%%" }}
           {{ if gt $downloadChange 0.0 }}
@@ -39,8 +61,8 @@
         <div class="size-h6">DOWNLOAD</div>
       </div>
       <div>
-        {{ $uploadChange := percentChange ($latest.Float "upload") ($stats.JSON.Float "upload.avg") }}
-        {{ if $showPercentage }}
+        {{ if and $showPercentage $hasStats }}
+        {{ $uploadChange := percentChange ($latest.Float "upload") ($statsResponse.JSON.Float "upload.avg") }}
         <div class="size-small {{ if gt $uploadChange 0.0 }}color-positive{{ else if lt $uploadChange 0.0 }}color-negative{{ else }}color-primary{{ end }}" style="display: inline-flex; align-items: center;">
           {{ $uploadChange | printf "%+.1f%%" }}
           {{ if gt $uploadChange 0.0 }}
@@ -58,8 +80,8 @@
         <div class="size-h6">UPLOAD</div>
       </div>
       <div>
-        {{ $pingChange := percentChange ($latest.Float "ping") ($stats.JSON.Float "ping.avg") }}
-        {{ if $showPercentage }}
+        {{ if and $showPercentage $hasStats }}
+        {{ $pingChange := percentChange ($latest.Float "ping") ($statsResponse.JSON.Float "ping.avg") }}
         <div class="size-small {{ if gt $pingChange 0.0 }}color-negative{{ else if lt $pingChange 0.0 }}color-positive{{ else }}color-primary{{ end }}" style="display: inline-flex; align-items: center;">
           {{ $pingChange | printf "%+.1f%%" }}
           {{ if lt $pingChange 0.0 }}
@@ -77,3 +99,38 @@
         <div class="size-h6">PING</div>
       </div>
     </div>
+    {{ if and $showPercentage (not $hasStats) }}
+    <div class="text-center">
+      <div class="color-base size-h6">Average comparison is currently unavailable.</div>
+    </div>
+    {{ end }}
+    {{ if and $showLastTest (ne $lastTestRaw "") }}
+    {{ $lastTest := $lastTestRaw | parseTime "rfc3339" }}
+    {{ $lastTestLocal := $lastTest.In now.Location }}
+    {{ $lastTestDate := $lastTestLocal | formatTime "2006-01-02" }}
+    {{ $todayDate := now | formatTime "2006-01-02" }}
+    {{ $yesterdayDate := offsetNow "-24h" | formatTime "2006-01-02" }}
+    <div class="flex justify-center margin-top-10">
+      <div class="size-h6 color-base" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 999px; background: rgba(127, 127, 127, 0.12); line-height: 1; white-space: nowrap;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="height: 0.95em; opacity: 0.8;" class="size-4">
+          <path fill-rule="evenodd" d="M8 1.75a6.25 6.25 0 1 0 0 12.5 6.25 6.25 0 0 0 0-12.5ZM.25 8a7.75 7.75 0 1 1 15.5 0A7.75 7.75 0 0 1 .25 8ZM8.75 4.5a.75.75 0 0 0-1.5 0V8c0 .199.079.39.22.53l2.25 2.25a.75.75 0 1 0 1.06-1.06L8.75 7.69V4.5Z" clip-rule="evenodd" />
+        </svg>
+        <span class="color-primary">Last test:</span>
+        <span class="color-highlight">
+          {{ if eq $lastTestDate $todayDate }}
+          {{ $lastTestLocal | formatTime "15:04" }}
+          {{ else if eq $lastTestDate $yesterdayDate }}
+          yesterday {{ $lastTestLocal | formatTime "15:04" }}
+          {{ else }}
+          {{ $lastTestLocal | formatTime "02.01. 15:04" }}
+          {{ end }}
+        </span>
+        {{ if $showRelativeTime }}
+        <span style="opacity: 0.45;">&middot;</span>
+        <span><span {{ $lastTestLocal | toRelativeTime }}></span> ago</span>
+        {{ end }}
+      </div>
+    </div>
+    {{ end }}
+    {{ end }}
+    {{ end }}
