@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/myspeed_unit.png" alt="MySpeed widget preview" width="100%">
+  <img src="docs/myspeed_last.png" alt="MySpeed widget preview" width="100%">
 </p>
 
 ---
@@ -69,19 +69,25 @@ Reference config: `examples/glance.yml`
 
 ### Speed (`widgets/myspeed.yml`)
 
-**Percentage + Units** (`showPercentageDiff: true`, `showUnit: true`)
+**Default** (`showPercentageDiff: true`, `showUnit: true`, `showLastTest: false`, `showRelativeTime: false`)
 <p align="center">
-  <img src="docs/myspeed_unit.png" alt="MySpeed widget with percentage diff and units" width="100%">
+  <img src="docs/myspeed_unit.png" alt="MySpeed widget default view with percentage diff and units" width="100%">
 </p>
 
-**Percentage only** (`showPercentageDiff: true`, `showUnit: false`)
+**Footer + Relative Time** (`showPercentageDiff: true`, `showUnit: true`, `showLastTest: true`, `showRelativeTime: true`)
+<p align="center">
+  <img src="docs/myspeed_last.png" alt="MySpeed widget with last test footer and relative time" width="100%">
+</p>
+
+**Percentage Only** (`showPercentageDiff: true`, `showUnit: false`, `showLastTest: false`, `showRelativeTime: false`)
 <p align="center">
   <img src="docs/myspeed_percentage.png" alt="MySpeed widget with percentage diff only" width="100%">
 </p>
 
-**Clean** (`showPercentageDiff: false`, `showUnit: false`)
+**Clean** (`showPercentageDiff: false`, `showUnit: false`, `showLastTest: false`, `showRelativeTime: false`)
 <p align="center">
   <img src="docs/myspeed.png" alt="MySpeed widget clean" width="100%">
+</p>
 
 ```yaml
 - type: custom-api
