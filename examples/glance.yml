@@ -1,0 +1,12 @@
+# Example page for glance-myspeed-widget
+# Requires: MYSPEED_URL in your Glance environment (.env, docker compose, etc.)
+#
+# Example:
+# MYSPEED_URL=http://10.10.1.133:5216
+
+pages:
+  - name: Home
+    columns:
+      - size: full
+        widgets:
+          - $include: widgets/myspeed.yml
